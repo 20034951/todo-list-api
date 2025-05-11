@@ -1,0 +1,35 @@
+# Node modules
+node_modules/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables
+.env
+.env.*
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Debug files
+*.swp
+
+# IDEs y editores
+.vscode/
+.idea/
+
+# Coverage reports
+coverage/
+
+# Build output
+dist/
+build/
+
+# Dependency directories (si usas pnpm o yarn también)
+.pnpm/
+.yarn/
