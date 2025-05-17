@@ -4,13 +4,13 @@
 ````markdown
 # Task & Goal API
 
-API RESTful construida con Node.js y Express para gestionar tareas (`tasks`) y metas (`goals`). Soporta operaciones CRUD básicas y requiere autenticación mediante un token enviado en el encabezado `Authorization`.
+API RESTful construida con **Node.js**, **Express** y **TypeScript** para gestionar tareas (`tasks`) y metas (`goals`). Soporta operaciones CRUD y requiere autenticación mediante un token en el header `Authorization`.
 
 ---
 
 ## Requisitos
 
-- Node.js >= 14
+- Node.js >= 16
 - npm
 - Archivo `.env` con las siguientes variables:
 
@@ -46,10 +46,10 @@ PORT=3000
 4. Ejecuta la aplicación:
 
 ```bash
-node app.js
+npx ts-node src/index.ts
 ```
 
-> También se puede usar `npx nodemon app.js` si se instala Nodemon para recarga automática.
+> También se puede usar `npx nodemon src/index.ts` si se instala Nodemon para recarga automática.
 
 ---
 
@@ -57,18 +57,22 @@ node app.js
 
 ```
 .
-├── app.js                      # Punto de entrada principal
-├── routes/
-│   └── todo.js                # Define las rutas de la API
-├── middleware/
-│   └── auth.js                # Middleware de autenticación
-├── models/
-│   ├── task.js                # Modelo de Task
-│   └── goal.js                # Modelo de Goal
-├── data/
-│   └── store.js               # Almacenamiento temporal en memoria
-├── .env                       # Variables de entorno
-└── README.md                  # Este archivo
+├── src/
+│   ├── index.ts              # Punto de entrada de la app
+│   ├── routes/
+│   │   ├── tasks.ts          # Rutas para tareas
+│   │   └── goals.ts          # Rutas para metas
+│   ├── models/
+│   │   ├── task.ts           # Modelo de datos Task
+│   │   └── goal.ts           # Modelo de datos Goal
+│   ├── middleware/
+│   │   └── auth.ts           # Middleware de autenticación
+│   └── data/
+│       └── store.ts          # Almacenamiento temporal (en memoria)
+├── .env                      # Variables de entorno
+├── tsconfig.json             # Configuración de TypeScript
+├── package.json              # Dependencias y scripts
+└── README.md                 # Este archivo
 ```
 
 ---
