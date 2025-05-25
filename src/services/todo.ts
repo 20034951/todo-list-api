@@ -65,9 +65,9 @@ export async function addGoal(item: any){
 }
 
 //DELETE TASK
-export async function removeTask(id: string){
+export async function removeTask(id: any){
     if (useMongo) {
-        return await TaskModel.findByIdAndDelete({id});
+        return await TaskModel.findByIdAndDelete({ _id : id });
     }
     const index = todoIndex(id, store.tasks);
     if(index !== -1){
@@ -78,9 +78,9 @@ export async function removeTask(id: string){
 }
 
 //DELETE GOAL
-export async function removeGoal(id: string){
+export async function removeGoal(id: any){
     if (useMongo) {
-        return await GoalModel.findByIdAndDelete({id});
+        return await GoalModel.findByIdAndDelete({ _id : id });
     }
     const index = todoIndex(id, store.goals);
     if(index !== -1){
@@ -92,8 +92,13 @@ export async function removeGoal(id: string){
 
 //UPDATE TASK
 export async function updateTask(updated: any){
-    if(useMongo){
-        return await TaskModel.findOneAndUpdate({_id: updated.id}, updated, { new: true});
+    if (useMongo) {
+        const { id, title, dueDate, completed } = updated;
+        return await TaskModel.findOneAndUpdate(
+            { _id: id },
+            { title, dueDate, completed },
+            { new: true }
+        );
     }
 
     const index = todoIndex(updated.id, store.tasks);
@@ -107,7 +112,12 @@ export async function updateTask(updated: any){
 //UPDATE GOAL
 export async function updateGoal(updated: any){
     if(useMongo){
-        return await GoalModel.findOneAndUpdate({_id: updated.id}, updated, { new: true});
+        const { id, title, dueDate, progress } = updated;
+        return await GoalModel.findOneAndUpdate(
+            { _id: id },
+            { title, dueDate, progress },
+            { new: true }
+        );
     }
 
     const index = todoIndex(updated.id, store.goals);

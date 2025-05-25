@@ -69,8 +69,8 @@ router.post('/addGoal', async (req: Request, res: Response) => {
 });
 
 //DELETE
-router.delete('/removeTask', async (req, res) => {
-    const {id} = req.body;
+router.delete('/removeTask/:id', async (req, res) => {
+    const {id} = req.params;
     const removed = await removeTask(id);
     if(!removed) {
         return res.status(404).json({ error: 'Task not found' })
@@ -79,8 +79,8 @@ router.delete('/removeTask', async (req, res) => {
     return res.status(200).json({message: 'Task removed', id});
 });
 
-router.delete('/removeGoal', async (req, res) => {
-    const {id} = req.body;
+router.delete('/removeGoal/:id', async (req, res) => {
+    const {id} = req.params;
     const removed = await removeGoal(id);
     if(!removed){
         return res.status(404).json({ error: 'Goal not found' })
@@ -90,9 +90,10 @@ router.delete('/removeGoal', async (req, res) => {
 
 //UPDATE
 router.put('/updateTask', async (req, res) => {
-    const {id, title, dueDate, completed} = req.body;
+    const { _id, id, title, dueDate, completed } = req.body;
+    const uid = id || _id;
     
-    const updated = await updateTask({id, title, dueDate, completed} as any);
+    const updated = await updateTask({id : uid, title, dueDate, completed} as any);
     if(!updated){
         return res.status(404).json({ error: 'Task not found' })
     }
@@ -101,9 +102,10 @@ router.put('/updateTask', async (req, res) => {
 });
 
 router.put('/updateGoal', async (req, res) => {
-    const {id, title, dueDate, progress} = req.body;
+    const { _id, id, title, dueDate, progress } = req.body;
+    const uid = id || _id;
     
-    const updated = await updateGoal({id, title, dueDate, progress} as any)
+    const updated = await updateGoal({id : uid, title, dueDate, progress} as any)
     if(!updated){
         return res.status(404).json({ error: 'Goal not found' })
     }
