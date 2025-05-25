@@ -2,17 +2,31 @@ import { Router, Request, Response } from 'express';
 import { store } from '../data/store'; 
 import { Task } from '../models/task';
 import { Goal } from '../models/goal';
+import { 
+    getTasks,
+    getGoals,
+    getTaskById,
+    getGoalById,
+    addTask,
+    addGoal,
+    removeTask,
+    removeGoal,
+    updateTask,
+    updateGoal
+
+} from '../services/todo';
 
 const router = Router();
 
 //GET
-router.get('/getTasks', (_req: Request, res: Response) => {
-    res.json(store.tasks);
+router.get('/getTasks', async (_req: Request, res: Response) => {
+    const tasks = await getTasks();
+    res.status(200).json(tasks);
 });
 
-router.get('/getTask/:id', (req: Request, res: Response) => {
+router.get('/getTask/:id', async (req: Request, res: Response) => {
     const {id} = req.params;
-    const task = store.tasks.find(task => task.id === id);
+    const task = await getTaskById(id);
 
     if(!task){
         return res.status(400).json({error: 'Task not found'});
@@ -20,13 +34,14 @@ router.get('/getTask/:id', (req: Request, res: Response) => {
     return res.status(200).json(task);
 });
 
-router.get('/getGoals', (_req: Request, res: Response) => {
-    res.json(store.goals);
+router.get('/getGoals', async (_req: Request, res: Response) => {
+    const goals = await getGoals();
+    res.status(200).json(goals);
 });
 
-router.get('/getGoal/:id', (req: Request, res: Response) => {
+router.get('/getGoal/:id', async (req: Request, res: Response) => {
     const {id} = req.params;
-    const goal = store.goals.find(goal => goal.id === id);
+    const goal = await getGoalById(id);
 
     if(!goal){
         return res.status(400).json({error: 'Goal not found'});
@@ -35,60 +50,65 @@ router.get('/getGoal/:id', (req: Request, res: Response) => {
 });
 
 //POST
-router.post('/addTask', (req: Request, res: Response) => {
+router.post('/addTask', async (req: Request, res: Response) => {
     const {title, dueDate} = req.body;
     if(!title || !dueDate){
         return res.status(400).json({error: 'Missing task values'});
     }
-    const task = new Task(title, dueDate);
-    store.tasks.push(task);
-    return res.status(201).json(task);
+    const savedTask = await addTask({title, dueDate} as any);
+    return res.status(201).json(savedTask);
 });
 
-router.post('/addGoal', (req: Request, res: Response) => {
+router.post('/addGoal', async (req: Request, res: Response) => {
     const {title, dueDate} = req.body;
     if(!title || !dueDate){
         return res.status(400).json({error: 'Missing goal values'});
     }
-    const goal = new Goal(title, dueDate);
-    store.goals.push(goal);
-    return res.status(201).json(goal);
+    const savedGoal = await addGoal({title, dueDate} as any);
+    return res.status(201).json(savedGoal);
 });
 
 //DELETE
-router.delete('/removeTask', (req, res) => {
-    const {id} = req.body;
-    store.tasks = store.tasks.filter(task => task.id !== id);
+router.delete('/removeTask/:id', async (req, res) => {
+    const {id} = req.params;
+    const removed = await removeTask(id);
+    if(!removed) {
+        return res.status(404).json({ error: 'Task not found' })
+    }
+    
     return res.status(200).json({message: 'Task removed', id});
 });
 
-router.delete('/removeGoal', (req, res) => {
-    const {id} = req.body;
-    store.goals = store.goals.filter(goal => goal.id !== id);
+router.delete('/removeGoal/:id', async (req, res) => {
+    const {id} = req.params;
+    const removed = await removeGoal(id);
+    if(!removed){
+        return res.status(404).json({ error: 'Goal not found' })
+    }
     return res.status(200).json({message: 'Goal removed', id});
 });
 
 //UPDATE
-router.put('/updateTask', (req, res) => {
-    const {id, title, dueDate, completed} = req.body;
-    const task = store.tasks.find(task => task.id === id);
-    if(!task) return res.status(404).json({error: 'Task not found'});
-
-    task.title = (title !== undefined) ? title : 'No Title Defined';
-    task.dueDate = (dueDate !== undefined) ? dueDate : Date.now();
-    task.completed = (completed !== undefined) ? completed : false;
-
+router.put('/updateTask', async (req, res) => {
+    const { _id, id, title, dueDate, completed } = req.body;
+    const uid = id || _id;
+    
+    const updated = await updateTask({id : uid, title, dueDate, completed} as any);
+    if(!updated){
+        return res.status(404).json({ error: 'Task not found' })
+    }
+    
     return res.status(200).json({message: 'Task updated'});
 });
 
-router.put('/updateGoal', (req, res) => {
-    const {id, title, dueDate, progress} = req.body;
-    const goal = store.goals.find(goal => goal.id === id);
-    if(!goal) return res.status(404).json({error: 'Goal not found'});
-
-    goal.title = (title !== undefined) ? title : 'No Title Defined';
-    goal.dueDate = (dueDate !== undefined) ? dueDate : Date.now();
-    goal.progress = (progress !== undefined) ? progress : 0;
+router.put('/updateGoal', async (req, res) => {
+    const { _id, id, title, dueDate, progress } = req.body;
+    const uid = id || _id;
+    
+    const updated = await updateGoal({id : uid, title, dueDate, progress} as any)
+    if(!updated){
+        return res.status(404).json({ error: 'Goal not found' })
+    }
 
     return res.status(200).json({message: 'Goal updated'});
 });

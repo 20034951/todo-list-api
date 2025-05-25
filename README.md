@@ -8,16 +8,17 @@ API RESTful construida con **Node.js**, **Express** y **TypeScript** para gestio
 
 ---
 
+## Características
+
+- Añadir, consultar, actualizar y eliminar Tareas y Metas.
+- Soporte de persistencia en memoria o MongoDB (según variable de entorno).
+- Integración con Docker y Mongo Express para administración visual de MongoDB.
+
 ## Requisitos
 
 - Node.js >= 16
 - npm
-- Archivo `.env` con las siguientes variables:
-
-```env
-AUTH_TOKEN=tu_token_secreto
-PORT=3000
-````
+- Docker y Docker Compose (en caso de usar MongoDB)
 
 ---
 
@@ -36,14 +37,61 @@ cd todo-list-api
 npm install
 ```
 
-3. Crea un archivo `.env` en la raíz del proyecto con este contenido:
+3. Se utilizan **dos archivos `.env`**:
+
+#### `deploy/.env` → para Docker
+
+Se debe crear dentro del directorio `deploy/`.
 
 ```env
-API_KEY=secreto123
+# deploy/.env
+MONGO_INITDB_ROOT_USERNAME=admin
+MONGO_INITDB_ROOT_PASSWORD=admin123
+```
+
+#### `.env` → para la API (en raíz del proyecto)
+
+```env
+# .env
+MONGO_URI=mongodb://admin:admin123@localhost:27017/todo
+STORAGE=mongo
 PORT=3000
 ```
 
+> Podemos modificar `STORAGE` y usar `memory` o `mongo` según la preferencia de almacenamiento.
+> Debemos de asegurarnos de utilizar los valores definidos en el archivo .env de directorio `deploy/` para la conexión a MongoDB en la variable `MANGO_URI`
+
+---
+
 4. Ejecuta la aplicación:
+
+1. Ejecutar el siguiente comando para levantar los contenedores"
+
+Desde el directorio `deploy/`:
+
+```bash
+docker compose up -d
+```
+
+Esto levantará:
+
+- `mongodb` en el puerto 27017
+- `mongo-express` en el puerto 8081
+
+Podemos acceder a la interfaz web de administración en:
+[http://localhost:8081](http://localhost:8081)
+
+Usando las credenciales que hayamos definido en el archivo .env del directorio `deploy/`
+
+Limpieza
+
+Para detener y eliminar contenedores y volúmenes debemos ejecutar el siguiente comando desde el directorio `deploy/`:
+
+```bash
+docker compose down -v
+```
+
+2. Ejecutar el siguiente comando para levantar el API desde el directorio raíz
 
 ```bash
 npx ts-node src/index.ts
@@ -53,26 +101,35 @@ npx ts-node src/index.ts
 
 ---
 
-## 🛠 Estructura del Proyecto
+## Estructura del Proyecto
 
 ```
 .
 ├── src/
-│   ├── index.ts              # Punto de entrada de la app
+│   ├── index.ts                      # Punto de entrada de la app
+│   ├── database/
+│   │   ├── mongo.ts                  # Conexión a MongoDB
+│   ├── services/
+│   │   ├── todo.ts                   # Lógica CRUD con soporte para datos en: memoria/MongoDB
 │   ├── routes/
-│   │   ├── tasks.ts          # Rutas para tareas
-│   │   └── goals.ts          # Rutas para metas
+│   │   ├── todo.ts                   # Rutas HTTP
 │   ├── models/
-│   │   ├── task.ts           # Modelo de datos Task
-│   │   └── goal.ts           # Modelo de datos Goal
+│   │   ├── task.ts                   # Modelo de datos Task
+│   │   └── goal.ts                   # Modelo de datos Goal
+│   ├── models/mongo/                 # Modelos de Mongoose
+│   │   ├── taskModel.ts              # Modelo de datos Task
+│   │   └── goalModel.ts              # Modelo de datos Goal
 │   ├── middleware/
-│   │   └── auth.ts           # Middleware de autenticación
+│   │   └── auth.ts                   # Middleware de autenticación
 │   └── data/
-│       └── store.ts          # Almacenamiento temporal (en memoria)
-├── .env                      # Variables de entorno
-├── tsconfig.json             # Configuración de TypeScript
-├── package.json              # Dependencias y scripts
-└── README.md                 # Este archivo
+│       └── store.ts                  # Almacenamiento temporal (en memoria)
+├── deploy/
+│   ├── docker-compose.yaml           # Definición de contenedores para MongoDB y MongoExpress
+│   └── .env                          # Variables de entorno de Docker
+├── .env                              # Variables de entorno para API
+├── tsconfig.json                     # Configuración de TypeScript
+├── package.json                      # Dependencias y scripts
+└── README.md                         # Este archivo
 ```
 
 ---
@@ -92,6 +149,19 @@ Se debe de usar el mismo token definido en el archivo `.env`.
 ---
 
 ## Endpoints
+
+| Método | Ruta             | Descripción                 |
+|--------|------------------|-----------------------------|
+| GET    | /getTasks        | Obtener todas las tareas    |
+| GET    | /getTask/:id     | Obtener una tarea por ID    |
+| POST   | /addTask         | Crear una nueva tarea       |
+| PUT    | /updateTask      | Actualizar una tarea        |
+| DELETE | /removeTask      | Eliminar una tarea          |
+| GET    | /getGoals        | Obtener todas las metas     |
+| GET    | /getGoal/:id     | Obtener una meta por ID     |
+| POST   | /addGoal         | Crear una nueva meta        |
+| PUT    | /updateGoal      | Actualizar una meta         |
+| DELETE | /removeGoal      | Eliminar una meta           |
 
 ### Tareas (`Task`)
 
@@ -196,6 +266,10 @@ Authorization: secreto123
 4. Para POST, PUT y DELETE, seleccionar la pestaña **Body**, eligir `raw` y `JSON`, e incluir el cuerpo del request como se muestra en los ejemplos.
 
 ---
+
+## Autor
+
+Desarrollado por Pablo Alfonso Vargas Melgar / 20034951
 
 ## Licencia
 
